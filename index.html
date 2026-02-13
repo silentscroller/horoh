@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Valentine Heart Game ❤️</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: pink;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    h1 {
+      color: white;
+      margin-top: 20px;
+    }
+
+    #score {
+      font-size: 20px;
+      color: white;
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 30px;
+      cursor: pointer;
+      animation: fall linear;
+    }
+
+    @keyframes fall {
+      from { transform: translateY(-50px); }
+      to { transform: translateY(100vh); }
+    }
+  </style>
+</head>
+<body>
+
+<h1>❤️ Catch The Hearts ❤️</h1>
+<div id="score">Score: 0</div>
+
+<script>
+  let score = 0;
+
+  function createHeart() {
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.innerHTML = "❤️";
+    heart.style.left = Math.random() * window.innerWidth + "px";
+    heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
+
+    heart.onclick = function() {
+      score++;
+      document.getElementById("score").innerText = "Score: " + score;
+      heart.remove();
+    };
+
+    document.body.appendChild(heart);
+
+    setTimeout(() => {
+      heart.remove();
+    }, 5000);
+  }
+
+  setInterval(createHeart, 800);
+</script>
+
+</body>
+</html>

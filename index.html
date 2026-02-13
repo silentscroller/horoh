@@ -1,68 +1,120 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Valentine Heart Game ❤️</title>
+  <title>My Flappy Game</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background: pink;
-      font-family: Arial, sans-serif;
-      text-align: center;
+      background: skyblue;
     }
-
-    h1 {
-      color: white;
-      margin-top: 20px;
-    }
-
-    #score {
-      font-size: 20px;
-      color: white;
-    }
-
-    .heart {
-      position: absolute;
-      font-size: 30px;
-      cursor: pointer;
-      animation: fall linear;
-    }
-
-    @keyframes fall {
-      from { transform: translateY(-50px); }
-      to { transform: translateY(100vh); }
+    canvas {
+      display: block;
+      margin: auto;
+      background: #70c5ce;
     }
   </style>
 </head>
 <body>
 
-<h1>❤️ Catch The Hearts ❤️</h1>
-<div id="score">Score: 0</div>
+<canvas id="game" width="400" height="600"></canvas>
 
 <script>
-  let score = 0;
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-  function createHeart() {
-    const heart = document.createElement("div");
-    heart.classList.add("heart");
-    heart.innerHTML = "❤️";
-    heart.style.left = Math.random() * window.innerWidth + "px";
-    heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
+const birdImg = new Image();
+birdImg.src = "bird.png";
 
-    heart.onclick = function() {
+const pipeImg = new Image();
+pipeImg.src = "pipe.png";
+
+let bird = {
+  x: 80,
+  y: 150,
+  width: 50,
+  height: 50,
+  gravity: 0.6,
+  lift: -12,
+  velocity: 0
+};
+
+let pipes = [];
+let frame = 0;
+let score = 0;
+
+function createPipe() {
+  let gap = 150;
+  let topHeight = Math.random() * 250 + 50;
+
+  pipes.push({
+    x: canvas.width,
+    top: topHeight,
+    bottom: canvas.height - topHeight - gap,
+    width: 60
+  });
+}
+
+function update() {
+  frame++;
+  if (frame % 90 === 0) createPipe();
+
+  bird.velocity += bird.gravity;
+  bird.y += bird.velocity;
+
+  pipes.forEach(pipe => {
+    pipe.x -= 3;
+
+    if (
+      bird.x < pipe.x + pipe.width &&
+      bird.x + bird.width > pipe.x &&
+      (bird.y < pipe.top ||
+       bird.y + bird.height > canvas.height - pipe.bottom)
+    ) {
+      alert("Game Over! Score: " + score);
+      document.location.reload();
+    }
+
+    if (pipe.x + pipe.width === bird.x) {
       score++;
-      document.getElementById("score").innerText = "Score: " + score;
-      heart.remove();
-    };
+    }
+  });
 
-    document.body.appendChild(heart);
+  pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
+}
 
-    setTimeout(() => {
-      heart.remove();
-    }, 5000);
-  }
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  setInterval(createHeart, 800);
+  ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+
+  pipes.forEach(pipe => {
+    ctx.drawImage(pipeImg, pipe.x, 0, pipe.width, pipe.top);
+    ctx.drawImage(
+      pipeImg,
+      pipe.x,
+      canvas.height - pipe.bottom,
+      pipe.width,
+      pipe.bottom
+    );
+  });
+
+  ctx.fillStyle = "white";
+  ctx.font = "20px Arial";
+  ctx.fillText("Score: " + score, 10, 25);
+}
+
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+document.addEventListener("keydown", () => {
+  bird.velocity = bird.lift;
+});
+
+gameLoop();
 </script>
 
 </body>
